@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from 'components/forms.html' import csrf, field %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">PLANEJAMENTO EM MOVIMENTO</span>
+      <h1>Cada pessoa, no seu tempo<span class="title-dot">.</span></h1>
+      <p>Uma visão clara da semana para sua equipe trabalhar em sintonia.</p>
+    </div>
+    <a class="button secondary"
+       href="{{ url_for('schedules.export', week=start.date().isoformat()) }}">{{ icon('download', 18) }} Exportar PDF</a>
+  </section>
+  <section class="panel calendar-panel">
+    <div class="section-heading calendar-toolbar">
+      <div>
+        <h2>Escala semanal</h2>
+        <p>{{ start.strftime("%d/%m") }} — {{ days[-1].strftime("%d/%m/%Y") }}</p>
+      </div>
+      <div class="week-navigation">
+        {% if previous %}
+        <a class="icon-button"
+           href="{{ url_for('schedules.index', week=previous) }}"
+           aria-label="Semana anterior">‹</a>
+        {% else %}<span class="icon-button" aria-disabled="true" aria-label="Início do período permitido">‹</span>{% endif %}
+        <a class="button secondary small-button" href="{{ url_for('schedules.index') }}">Hoje</a>
+        {% if following %}<a class="icon-button"
+   href="{{ url_for('schedules.index', week=following) }}"
+   aria-label="Próxima semana">›</a>
+        {% else %}<span class="icon-button" aria-disabled="true" aria-label="Fim do período permitido">›</span>{% endif %}
+        <form method="get" class="inline-form">
+          <label class="sr-only" for="week">Ir para a semana da data</label><input id="week"
+       name="week"
+       type="date"
+       value="{{ selected_day }}"
+       min="2000-01-01"
+       max="2100-12-31"
+       required><button type="submit" class="button secondary small-button">Ir</button>
+        </form>
+      </div>
+    </div>
+    <div class="calendar-scroll"><div class="week-grid" role="list" aria-label="Calendário semanal">{% for day in days %}<section class="day-column" role="listitem"><header><span>{{ ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'][loop.index0] }}</span><strong>{{ day.strftime("%d") }}</strong></header><div class="day-events">{% for row in schedules %}{% if row.start_at < (day + (end-start)/7).isoformat() and row.end_at > day.isoformat() %}<article class="schedule-event" style="--shift-color: {{ row.color }}"><span class="event-time">{% if row.start_at[:10] != day.date().isoformat() %}↳ Continuação{% else %}{{ row.start_at[11:16] }} — {{ row.end_at[11:16] }}{% if row.start_at[:10] != row.end_at[:10] %} (+1){% endif %}{% endif %}</span><strong>{{ row.employee_name }}</strong><span>{{ row.shift_name }}</span><div class="event-actions"><a href="{{ url_for('schedules.index', schedule_id=row.id, week=start.date().isoformat()) }}#assignment-form"
+   aria-label="Editar turno de {{ row.employee_name }}">Editar</a><form method="post"
+      action="{{ url_for('schedules.delete', schedule_id=row.id) }}"
+      data-confirm="Remover esta atribuição da escala?">{{ csrf() }}<button type="submit" aria-label="Remover turno de {{ row.employee_name }}">Remover</button></form></div></article>{% endif %}{% endfor %}{% if min_date <= day.date() <= max_date %}<a class="add-day"
+   href="{{ url_for('schedules.index', week=start.date().isoformat(), day=day.date().isoformat()) }}#assignment-form"
+   data-date="{{ day.date().isoformat() }}"
+   aria-label="Atribuir turno em {{ day.strftime('%d/%m') }}">{{ icon('plus', 16) }} Atribuir</a>{% endif %}</div></section>{% endfor %}</div></div>
+  {% if not schedules %}<p class="calendar-empty">Sua semana está pronta para ser planejada. Use o formulário abaixo para atribuir turnos.</p>{% endif %}</section>
+  {% if alerts %}<section class="warning-panel" aria-label="Alertas da semana"><h3>{{ icon('alert', 18) }} Atenção ao planejamento</h3><ul>{% for alert in alerts %}<li>{{ alert }}</li>{% endfor %}</ul></section>{% endif %}
+  <div class="split-layout schedule-forms"><section class="panel" id="assignment-form"><div class="section-heading"><div><h2>{{ 'Editar atribuição' if assignment else 'Atribuir turno' }}</h2><p>Sobreposições e indisponibilidades são bloqueadas.</p></div>{{ icon('calendar', 21) }}</div>{% if employees and shifts %}<form method="post" class="padded-form form-stack">{{ csrf() }}<div class="field"><label for="employee_id">Funcionário ativo</label><select id="employee_id" name="employee_id" required><option value="">Selecione um funcionário</option>{% for employee in employees %}<option value="{{ employee.id }}"
+        {% if form and form.employee_id|string == employee.id|string %}selected{% endif %}>{{ employee.name }} · {{ employee.department }}</option>{% endfor %}</select></div><div class="form-grid">{{ field('Data de início','work_date',form.work_date if form else selected_day,type='date',min='2000-01-01',max='2100-12-31') }}<div class="field"><label for="shift_id">Turno</label><select id="shift_id" name="shift_id" required><option value="">Selecione um turno</option>{% for shift in shifts %}<option value="{{ shift.id }}"
+        {% if form and form.shift_id|string == shift.id|string %}selected{% endif %}>{{ shift.name }} · {{ shift.start_time }}–{{ shift.end_time }}</option>{% endfor %}</select></div></div><p class="form-help">O limite semanal e o descanso mínimo geram alertas de acordo com as configurações da empresa.</p><div class="form-actions">{% if assignment %}<a class="button secondary"
+   href="{{ url_for('schedules.index', week=start.date().isoformat()) }}">Cancelar</a>{% endif %}<button type="submit" class="button primary">{{ icon('check', 17) }} Salvar atribuição</button></div></form>{% else %}<div class="empty-state compact">{{ icon('calendar', 30) }}<h3>Vamos preparar a operação?</h3><p>É necessário um funcionário ativo e um turno cadastrado.</p><div class="row-actions"><a class="button secondary" href="{{ url_for('employees.form') }}">Cadastrar funcionário</a><a class="button primary" href="{{ url_for('shifts.index') }}">Cadastrar turno</a></div></div>{% endif %}</section>
+    <section class="panel"><div class="section-heading"><div><h2>Registrar indisponibilidade</h2><p>Folgas, férias e outros períodos de ausência.</p></div>{{ icon('clock', 21) }}</div>{% if all_employees %}<form method="post"
+      action="{{ url_for('schedules.unavailability', week=start.date().isoformat()) }}"
+      class="padded-form form-stack">{{ csrf() }}<div class="field"><label for="unavailable_employee">Funcionário</label><select id="unavailable_employee" name="employee_id" required><option value="">Selecione um funcionário</option>{% for employee in all_employees %}<option value="{{ employee.id }}" {% if unavailable_form and unavailable_form.employee_id|string == employee.id|string %}selected{% endif %}>{{ employee.name }}</option>{% endfor %}</select></div><div class="form-grid">{{ field('Início','start_at',unavailable_form.start_at if unavailable_form else '',type='datetime-local',min='2000-01-01T00:00',max='2100-12-31T23:59') }}{{ field('Fim','end_at',unavailable_form.end_at if unavailable_form else '',type='datetime-local',min='2000-01-01T00:00',max='2100-12-31T23:59') }}</div>{{ field('Motivo','reason',unavailable_form.reason if unavailable_form else '',maxlength=120,placeholder='Ex.: Folga programada') }}<div class="form-actions"><button type="submit" class="button secondary">{{ icon('plus', 17) }} Registrar período</button></div></form>{% else %}<div class="empty-state compact"><p>Cadastre um funcionário para registrar uma indisponibilidade.</p></div>{% endif %}</section></div>
+  <section class="panel"><div class="section-heading"><div><h2>Indisponibilidades cadastradas</h2><p>Períodos registrados de toda a equipe.</p></div><span class="count-badge">{{ unavailable|length }}</span></div>{% if unavailable %}<div class="table-scroll"><table><thead><tr><th>Funcionário</th><th>Início</th><th>Fim</th><th>Motivo</th><th class="align-right">Ação</th></tr></thead><tbody>{% for item in unavailable %}<tr><td><strong>{{ item.employee_name }}</strong></td><td>{{ item.start_at|datetime_br }}</td><td>{{ item.end_at|datetime_br }}</td><td>{{ item.reason }}</td><td><form class="row-actions"
+      method="post"
+      action="{{ url_for('schedules.delete_unavailability', record_id=item.id, week=start.date().isoformat()) }}"
+      data-confirm="Remover esta indisponibilidade?">{{ csrf() }}<button type="submit" class="button ghost small-button danger-text">Remover</button></form></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact"><p>Nenhuma indisponibilidade cadastrada.</p></div>{% endif %}</section>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/schedules.js') }}" defer></script>
+{% endblock %}

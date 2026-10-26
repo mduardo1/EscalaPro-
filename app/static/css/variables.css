@@ -1,0 +1,24 @@
+:root {
+  --blue: #2563EB;
+  --blue-dark: #1E40AF;
+  --blue-soft: #EFF5FF;
+  --ink: #111827;
+  --muted: #64748B;
+  --canvas: #F6F8FC;
+  --light: #F1F5F9;
+  --white: #FFFFFF;
+  --border: #E2E8F0;
+  --green: #16836A;
+  --green-soft: #EBF7F2;
+  --amber: #946017;
+  --amber-soft: #FFFAEC;
+  --red: #B42337;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 3px 18px #18294404;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Manrope', 'Inter', sans-serif;
+  --sidebar-width: 248px;
+  --navbar-height: 80px;
+  --space: 8px
+}

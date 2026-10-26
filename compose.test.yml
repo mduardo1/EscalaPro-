@@ -1,0 +1,23 @@
+# Somente testes locais, sem volume ou credencial de produção.
+services:
+  postgres:
+    image: postgres:18.3
+    environment:
+      POSTGRES_DB: escalapro_test
+      POSTGRES_USER: escalapro_test
+      POSTGRES_PASSWORD: isolated-test-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U escalapro_test -d escalapro_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  tests:
+    build:
+      context: .
+      target: test
+    environment:
+      TEST_DATABASE_URL: postgresql+psycopg://escalapro_test:isolated-test-only@postgres:5432/escalapro_test
+      PYTHON_DOTENV_DISABLED: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy

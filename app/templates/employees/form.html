@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from 'components/forms.html' import csrf, field %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">GESTÃO DE PESSOAS</span>
+      <h1>{{ title }}<span class="title-dot">.</span></h1>
+      <p>Informações claras para um planejamento mais eficiente.</p>
+    </div>
+    <a class="button secondary" href="{{ url_for('employees.index') }}">Voltar para funcionários</a>
+  </section>
+  <div class="form-layout">
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Dados do profissional</h2>
+          <p>Preencha os campos abaixo. E-mail é opcional.</p>
+        </div>
+        {{ icon('users', 22) }}
+      </div>
+      <form method="post" class="padded-form form-stack">
+        {{ csrf() }}{{ field('Nome completo','name',employee.name if employee else '',placeholder='Como o profissional se chama?') }}
+        <div class="form-grid">{{ field('Cargo','role',employee.role if employee else '',maxlength=80,placeholder='Ex.: Analista') }}{{ field('Setor','department',employee.department if employee else '',maxlength=80,placeholder='Ex.: Operações') }}</div>
+        {{ field('E-mail','email',employee.email if employee else '',type='email',required=false,maxlength=254,placeholder='profissional@example.com') }}{{ field('Jornada semanal (horas)','weekly_hours',employee.weekly_hours if employee else '40',type='number',min=0.5,max=168,step=0.5) }}
+        <div class="form-actions">
+          <a class="button secondary" href="{{ url_for('employees.index') }}">Cancelar</a><button class="button primary" type="submit">{{ icon('check', 17) }} Salvar funcionário</button>
+        </div>
+      </form>
+    </section>
+    <aside class="info-card">
+      <span class="stat-icon">{{ icon('info', 22) }}</span>
+      <h3>Cada equipe tem seu ritmo.</h3>
+      <p>A jornada semanal é uma referência individual para os alertas de planejamento. Configure o valor adequado à categoria e ao contrato do profissional.</p>
+      <p>Ao desativar um funcionário, seu histórico e as atribuições já registradas são preservados.</p>
+    </aside>
+  </div>
+{% endblock %}

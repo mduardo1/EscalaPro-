@@ -1,0 +1,9 @@
+-r requirements.txt
+pytest==9.1.1
+pypdf==6.21.0
+# Ferramentas opcionais para manutenção; não são necessárias ao servidor.
+black==26.10.1
+djlint==1.46.6
+# Revisão visual de PDFs em máquinas sem Poppler.
+PyMuPDF==1.28.2
+pytest-cov==7.1.0

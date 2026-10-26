@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from 'components/forms.html' import csrf, field, password_field, auth_submit %}
+{% block public_content %}
+  <div class="login-layout">
+    <section class="login-story">
+      <a class="brand"
+         href="{{ url_for('index') }}"><span class="brand-mark">{{ icon('calendar', 24) }}</span><span>EscalaPro</span></a>
+      <div>
+        <span class="eyebrow">PESSOAS. TEMPO. EQUILÍBRIO.</span>
+        <h1>
+          Uma rotina
+          <br>
+          mais organizada
+          <br>
+          começa aqui.
+        </h1>
+        <p>Conecte pessoas e horários com um planejamento simples, claro e inteligente.</p>
+        <div class="login-story-line"></div>
+        <span class="tiny-label">ESCALAPRO / WORKFORCE MANAGEMENT</span>
+      </div>
+      <small>Feito para tornar cada jornada melhor.</small>
+    </section>
+    <section class="login-form-panel">
+      <div class="login-box">
+        <span class="stat-icon">{{ icon('calendar', 26) }}</span>
+        <h2>Bem-vindo de volta.</h2>
+        <p class="muted">Acesse sua conta para organizar o próximo passo.</p>
+        <form method="post" class="form-stack" data-auth-form>
+          {{ csrf() }}{{ field('E-mail', 'email', request.form.get('email',''), type='email', maxlength=254, placeholder='voce@example.com') }}
+          {{ password_field('Senha', new_password=false) }}
+          {{ auth_submit('Entrar na plataforma', 'Entrando…') }}
+        </form>
+        <nav class="login-account-options" aria-label="Opções da conta">
+          <a class="recovery-link" href="{{ url_for('auth.forgot_password') }}">Esqueceu sua senha?</a>
+          <div class="login-signup">
+            <p>Ainda não possui uma conta?</p>
+            <a class="button secondary full" href="{{ url_for('auth.register') }}">Criar conta gratuitamente</a>
+          </div>
+        </nav>
+        <div class="login-hint">
+          Acesso exclusivo para administradores.
+          <br>
+          Funcionários cadastrados na equipe não possuem login.
+        </div>
+      </div>
+      <small class="muted">EscalaPro · Gestão inteligente de escalas</small>
+    </section>
+  </div>
+{% endblock %}

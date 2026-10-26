@@ -1,0 +1,33 @@
+{% macro csrf() %}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% endmacro %}
+{% macro password_field(label, name='password', new_password=true, help_id=none) %}
+  <div class="field">
+    <label for="{{ name }}">{{ label }}</label>
+    <div class="password-wrap">
+      <input id="{{ name }}" name="{{ name }}" type="password" required
+             {% if new_password %}minlength="12"{% endif %} maxlength="128"
+             autocomplete="{{ 'new-password' if new_password else 'current-password' }}"
+             {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
+      <button type="button" id="{{ name }}-toggle" data-password-toggle
+              aria-controls="{{ name }}" aria-pressed="false"
+              aria-label="Mostrar senha: {{ label }}" data-field-label="{{ label }}">Mostrar</button>
+    </div>
+  </div>
+{% endmacro %}
+{% macro auth_submit(label, loading_label) %}
+  <button class="button primary full" type="submit" data-loading-label="{{ loading_label }}">{{ label }}</button>
+  <p class="form-status sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+{% endmacro %}
+{% macro field(label, name, value='', type='text', required=true, maxlength=100, min=none, max=none, step=none, placeholder='') %}
+  <div class="field"><label for="{{ name }}">{{ label }}{% if not required %} <span class="muted">(opcional)</span>{% endif %}</label><input id="{{ name }}"
+       name="{{ name }}"
+       type="{{ type }}"
+       value="{{ value if value is not none else '' }}"
+       {% if required %}required{% endif %}
+       {% if type in ['text','email','password'] %}maxlength="{{ maxlength }}"{% endif %}
+       {% if min is not none %}min="{{ min }}"{% endif %}
+       {% if max is not none %}max="{{ max }}"{% endif %}
+       {% if step is not none %}step="{{ step }}"{% endif %}
+       placeholder="{{ placeholder }}"></div>
+{% endmacro %}

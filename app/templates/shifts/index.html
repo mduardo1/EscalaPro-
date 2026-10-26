@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from 'components/forms.html' import csrf, field %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">HORÁRIOS COM FLEXIBILIDADE</span>
+      <h1>Um turno para cada rotina<span class="title-dot">.</span></h1>
+      <p>Defina os horários que organizam a operação da sua empresa.</p>
+    </div>
+  </section>
+  <div class="split-layout"><section class="panel"><div class="section-heading"><h2>Turnos cadastrados</h2><span class="count-badge">{{ shifts|length }}</span></div>{% if shifts %}<div class="shift-list">{% for item in shifts %}<article class="shift-card" style="--shift-color: {{ item.color }}"><div><span class="shift-dot"></span><strong>{{ item.name }}</strong><p class="shift-time">{{ item.start_time }} <span>→</span> {{ item.end_time }}{% if item.end_time < item.start_time %}<span class="badge blue">+1 dia</span>{% endif %}</p><small class="muted">{{ item.break_minutes }} min de intervalo</small></div><a class="button secondary small-button"
+   href="{{ url_for('shifts.index', shift_id=item.id) }}">Editar</a></article>{% endfor %}</div>{% else %}<div class="empty-state">{{ icon('clock', 36) }}<h3>Dê forma à sua rotina</h3><p>Cadastre o primeiro turno no formulário ao lado.</p></div>{% endif %}</section><section class="panel"><div class="section-heading"><div><h2>{{ 'Editar turno' if editing else 'Novo turno' }}</h2><p>Horários locais da empresa.</p></div>{{ icon('plus', 20) }}</div><form method="post" class="padded-form form-stack">{{ csrf() }}{{ field('Nome do turno','name',shift.name if shift else '',maxlength=80,placeholder='Ex.: Manhã') }}<div class="form-grid">{{ field('Início','start_time',shift.start_time if shift else '',type='time') }}{{ field('Fim','end_time',shift.end_time if shift else '',type='time') }}</div><div class="form-grid">{{ field('Intervalo (minutos)','break_minutes',shift.break_minutes if shift else 0,type='number',min=0,max=1439,step=1) }}{{ field('Cor de identificação','color',shift.color if shift else '#2563EB',type='color') }}</div><p class="form-help">Se o horário final for anterior ao inicial, o turno termina no dia seguinte. Alterações aqui valem para novas atribuições; horários já atribuídos são preservados.</p><div class="form-actions">{% if editing %}<a class="button secondary" href="{{ url_for('shifts.index') }}">Cancelar</a>{% endif %}<button class="button primary" type="submit">{{ icon('check', 17) }} Salvar turno</button></div></form></section></div>
+{% endblock %}

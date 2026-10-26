@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow">VISÃO GERAL</span>
+      <h1>Sua equipe, em sintonia<span class="title-dot">.</span></h1>
+      <p>Acompanhe a operação e prepare uma semana mais organizada.</p>
+    </div>
+    <a class="button primary"
+       href="{{ url_for('schedules.index') }}">{{ icon('plus', 18) }} Nova atribuição</a>
+  </section>
+  <div class="period-strip"><span>{{ icon('calendar', 17) }} Semana de {{ start.strftime("%d/%m") }} a {{ (end - start.resolution).strftime("%d/%m/%Y") }}</span><span class="live-indicator"><span class="status-dot"></span>Visão atualizada</span></div>
+  <section class="stats-grid" aria-label="Indicadores da semana">
+    {% for glyph, label, value, foot in [('users','Funcionários ativos',employees|length,'Pessoas que movem sua operação'),('clock','Turnos cadastrados',shifts|length,'Horários para cada necessidade'),('calendar','Escalas na semana',schedules|length,'Atribuições que tocam o período'),('alert','Alertas de atenção',alerts|length,'Regras configuradas da equipe')] %}
+      <article class="stat-card"><div class="stat-top"><span>{{ label }}</span><span class="stat-icon {% if glyph == 'alert' and alerts %}warning-icon{% endif %}">{{ icon(glyph,20) }}</span></div><strong class="stat-value">{{ '%02d'|format(value) }}</strong><p>{{ foot }}</p></article>{% endfor %}
+  </section>
+  <div class="dashboard-grid">
+    <section class="panel chart-panel">
+      <div class="section-heading">
+        <div>
+          <h2>O ritmo da semana</h2>
+          <p>Horas planejadas por dia, descontando intervalos.</p>
+        </div>
+        <span class="badge blue">Esta semana</span>
+      </div>
+      <div class="chart-summary"><strong>{{ '%g'|format(total_hours) }}<span>h</span></strong><span class="muted">de trabalho planejado</span><span class="chart-legend"><i></i> Horas alocadas</span></div>
+      <div class="chart-container">
+        <canvas id="weekly-chart"
+                data-values="{{ chart|tojson|forceescape }}"
+                role="img"
+                aria-label="Gráfico de horas planejadas por dia da semana"></canvas>
+        <div id="chart-fallback" class="chart-fallback" hidden></div>
+      </div>
+      <div class="chart-note">{{ icon('info', 15) }} Turnos noturnos são distribuídos entre os dias correspondentes.</div>
+    </section>
+    <section class="panel attention-panel"><div class="section-heading"><div><h2>No seu radar</h2><p>Um olhar atento ao planejamento.</p></div><span class="count-badge">{{ alerts|length }}</span></div>{% if alerts %}<ul class="alert-list">{% for alert in alerts %}<li>{{ icon('alert', 18) }}<span>{{ alert }}</span></li>{% endfor %}</ul>{% else %}<div class="clear-state"><span class="clear-icon">{{ icon('check', 30) }}</span><h3>Tudo em ordem por aqui</h3><p>Nenhum alerta nas regras configuradas para esta semana.</p></div>{% endif %}<a class="panel-link" href="{{ url_for('dashboard.settings') }}">Configurar regras de atenção {{ icon('arrow', 16) }}</a></section></div>
+  <section class="panel upcoming-panel"><div class="section-heading"><div><h2>Próximos turnos</h2><p>Atribuições em andamento e nos próximos 7 dias.</p></div><a class="text-link" href="{{ url_for('schedules.index') }}">Ver todas as escalas {{ icon('arrow', 16) }}</a></div>{% if upcoming %}<div class="table-scroll"><table><thead><tr><th>Funcionário</th><th>Setor</th><th>Turno</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody>{% for row in upcoming %}<tr><td><span class="person-cell"><span class="avatar small">{{ row.employee_name[:1]|upper }}</span><strong>{{ row.employee_name }}</strong></span></td><td>{{ row.department }}</td><td><span class="shift-dot" style="--shift-color: {{ row.color }}"></span>{{ row.shift_name }}</td><td>{{ row.start_at|datetime_br }}</td><td>{{ row.end_at|datetime_br }}</td><td><span class="badge {% if row.start_at <= now.isoformat() %}green{% else %}blue{% endif %}">{% if row.start_at <= now.isoformat() %}Em andamento{% else %}Programado{% endif %}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact">{{ icon('calendar', 30) }}<h3>O próximo passo é planejar.</h3><p>Cadastre sua equipe e atribua o primeiro turno.</p><a class="text-link" href="{{ url_for('schedules.index') }}">Criar uma atribuição {{ icon('arrow', 16) }}</a></div>{% endif %}</section>
+{% endblock %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"
+          defer></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+{% endblock %}

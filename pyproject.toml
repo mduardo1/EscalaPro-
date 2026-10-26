@@ -1,0 +1,12 @@
+[tool.black]
+target-version = ["py314"]
+line-length = 88
+include = '\.pyi?$'
+extend-exclude = '/(\.venv|tmp|instance)/'
+
+[tool.djlint]
+profile = "jinja"
+indent = 2
+max_line_length = 100
+format_css = false
+format_js = false

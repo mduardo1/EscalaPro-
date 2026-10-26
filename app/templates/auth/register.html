@@ -1,0 +1,16 @@
+{% extends 'auth/flow_base.html' %}
+{% from 'components/forms.html' import csrf, field, password_field, auth_submit %}
+{% block account_content %}
+<p class="account-intro">Organize sua empresa em um espaço exclusivo. Confirme seu e-mail para ativar a conta administrativa.</p>
+<form method="post" class="form-stack" data-auth-form>
+  {{ csrf() }}
+  {{ field('Nome completo','name',request.form.get('name',''),maxlength=80) }}
+  {{ field('Nome da empresa','company_name',request.form.get('company_name','')) }}
+  {{ field('E-mail','email',request.form.get('email',''),type='email',maxlength=254) }}
+  {{ password_field('Senha', help_id='password-help') }}
+  <p id="password-help" class="form-help">Use de 12 a 128 caracteres, com maiúscula, minúscula, número e símbolo.</p>
+  {{ password_field('Confirmar senha', 'confirm_password') }}
+  {{ auth_submit('Criar minha conta', 'Enviando solicitação…') }}
+</form>
+<p class="login-hint">Se já existir uma conta com este e-mail, seus dados e sua senha serão preservados. Use <a href="{{ url_for('auth.forgot_password') }}">recuperar senha</a> para voltar a acessar.</p>
+{% endblock %}

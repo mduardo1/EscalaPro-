@@ -1,0 +1,10 @@
+<header class="navbar">
+  <div class="navbar-left">
+    <button class="icon-button menu-toggle"
+            type="button"
+            aria-label="Abrir menu"
+            aria-controls="sidebar"
+            aria-expanded="false">{{ icon("menu") }}</button><span class="breadcrumb">Workspace {{ icon('chevron', 13) }} <strong>{{ title }}</strong></span>
+  </div>
+  <div class="navbar-right"><span class="private-label">{{ icon('check', 15) }} Área administrativa</span><span class="nav-divider"></span><span class="avatar">{{ current_user.name[:1]|upper }}</span><span class="user-info"><strong>{{ current_user.name }}</strong><small>Administrador</small></span></div>
+</header>

@@ -1,0 +1,39 @@
+{% from 'components/icons.html' import icon %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2563EB">
+    <meta name="description"
+          content="EscalaPro — gestão inteligente de funcionários, turnos e escalas de trabalho.">
+    <title>{{ title }} · EscalaPro</title>
+    <link rel="icon"
+          href="{{ url_for('static', filename='img/favicon.svg') }}"
+          type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap"
+          rel="stylesheet">
+    {% for file in ['variables', 'base', 'layout', 'components', 'pages'] %}
+      <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/' ~ file ~ '.css') }}">
+    {% endfor %}
+    {% block head %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  </head>
+  <body class="{% if current_user %}app-body{% else %}public-body{% endif %}">
+    <a class="skip-link" href="#main">Pular para o conteúdo</a>
+    {% if current_user %}
+      {% include "components/sidebar.html" %}
+      <div class="app-shell">{% include "components/navbar.html" %}<main id="main" class="main-content" tabindex="-1">{% include "components/flash_messages.html" %}{% block content %}{% endblock %}<footer class="app-footer"><span>EscalaPro <span class="muted">/</span> Organização que faz a diferença.</span><span>Seu tempo, bem planejado.</span></footer></main></div>
+      <button class="sidebar-overlay" aria-label="Fechar menu" tabindex="-1" hidden></button>
+    {% else %}
+      <main id="main" tabindex="-1">
+        {% include "components/flash_messages.html" %}
+        {% block public_content %}{% endblock %}
+      </main>
+    {% endif %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,31 @@
+{% from 'components/forms.html' import csrf %}
+<aside class="sidebar" id="sidebar" aria-label="Menu principal">
+  <a class="brand" href="{{ url_for('dashboard.index') }}"><span class="brand-mark">{{ icon('calendar', 23) }}</span><span>Escala<span class="brand-blue">Pro</span><small>WORKFORCE MANAGEMENT</small></span></a>
+  <span class="nav-label">WORKSPACE</span>
+  <nav>
+    {% for endpoint, label, glyph, prefix in [('dashboard.index','Dashboard','grid','dashboard.index'),('employees.index','Funcionários','users','employees.'),('shifts.index','Turnos','clock','shifts.'),('schedules.index','Escalas','calendar','schedules.')] %}
+      <a class="nav-link {% if request.endpoint and request.endpoint.startswith(prefix) %}active{% endif %}"
+         href="{{ url_for(endpoint) }}"
+         {% if request.endpoint and request.endpoint.startswith(prefix) %}aria-current="page"{% endif %}>{{ icon(glyph) }}<span>{{ label }}</span>{% if label == "Dashboard" %}<span class="nav-dot"></span>{% endif %}</a>
+    {% endfor %}
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="workspace-note">
+      <span class="tiny-label">PLANEJE COM CLAREZA</span>
+      <p>
+        Uma equipe organizada.
+        <br>
+        Um dia mais tranquilo.
+      </p>
+      <a href="{{ url_for('schedules.index') }}">Organizar escalas {{ icon('arrow', 16) }}</a>
+    </div>
+    <a class="nav-link {% if request.endpoint == 'dashboard.settings' %}active{% endif %}"
+       href="{{ url_for('dashboard.settings') }}"
+       {% if request.endpoint == 'dashboard.settings' %}aria-current="page"{% endif %}>{{ icon("settings") }}Configurações</a>
+    <form action="{{ url_for('auth.logout') }}" method="post">
+      {{ csrf() }}<button class="nav-link logout"
+        type="submit">{{ icon("logout") }}Sair da conta</button>
+    </form>
+    <div class="sidebar-version"><span class="status-dot"></span>EscalaPro · MVP 1.0</div>
+  </div>
+</aside>
