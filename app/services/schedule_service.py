@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, time, timedelta
 
 from app.database import get_db, parameters, begin_write, lock_employees, lock_schedule
@@ -32,6 +33,52 @@ def week_period(value):
     monday = day - timedelta(days=day.weekday())
     start = datetime.combine(monday, time.min)
     return start, start + timedelta(days=7)
+
+
+MONTH_NAMES = (
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+)
+
+
+def month_period(value):
+    if not re.fullmatch(r"[0-9]{4}-[0-9]{2}", value or ""):
+        raise ValueError("Informe um mês válido no formato AAAA-MM.")
+    day = date_value(f"{value}-01")
+    start = datetime.combine(day, time.min)
+    end = (
+        start.replace(year=start.year + 1, month=1)
+        if start.month == 12
+        else start.replace(month=start.month + 1)
+    )
+    return start, end
+
+
+def month_alerts(start, end):
+    # Jornadas continuam semanais, com semanas completas nas bordas do mês.
+    first = start - timedelta(days=start.weekday())
+    last = end + timedelta(days=(7 - end.weekday()) % 7)
+    rows = list_schedules((first - timedelta(days=4)).isoformat(), last.isoformat())
+    settings = get_settings()
+    alerts = []
+    while first < end:
+        following = first + timedelta(days=7)
+        alerts.extend(
+            f"Semana de {first:%d/%m/%Y}: {alert}"
+            for alert in collect_alerts(rows, settings, first, following)
+        )
+        first = following
+    return alerts
 
 
 def week_alerts(start, end):

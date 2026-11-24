@@ -1,4 +1,4 @@
-"""Relatório semanal em memória, com tabelas paginadas e texto escapado."""
+"""Relatórios em memória, com tabelas paginadas e texto escapado."""
 
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -23,6 +23,14 @@ pdfmetrics.registerFont(
 
 
 def weekly_pdf(company_name, start, end, schedules) -> BytesIO:
+    return period_pdf(company_name, start, end, schedules, "semanal", "semana")
+
+
+def monthly_pdf(company_name, start, end, schedules) -> BytesIO:
+    return period_pdf(company_name, start, end, schedules, "mensal", "mês")
+
+
+def period_pdf(company_name, start, end, schedules, label, period) -> BytesIO:
     output = BytesIO()
     document = SimpleDocTemplate(
         output,
@@ -31,7 +39,7 @@ def weekly_pdf(company_name, start, end, schedules) -> BytesIO:
         leftMargin=17 * mm,
         topMargin=17 * mm,
         bottomMargin=18 * mm,
-        title="Escala semanal - EscalaPro",
+        title=f"Escala {label} - EscalaPro",
         author="EscalaPro",
     )
     styles = getSampleStyleSheet()
@@ -70,7 +78,7 @@ def weekly_pdf(company_name, start, end, schedules) -> BytesIO:
         Spacer(1, 3 * mm),
         Paragraph(escape(company_name), company_style),
         Paragraph(
-            f"Escala semanal | {start:%d/%m/%Y} a {end-timedelta(days=1):%d/%m/%Y}",
+            f"Escala {label} | {start:%d/%m/%Y} a {end-timedelta(days=1):%d/%m/%Y}",
             subtitle,
         ),
         Paragraph(
@@ -130,7 +138,7 @@ def weekly_pdf(company_name, start, end, schedules) -> BytesIO:
             Spacer(1, 6 * mm),
             Paragraph(
                 "Horários locais da empresa. Turnos que atravessam a meia-noite exibem a data de término. "
-                "O relatório inclui atribuições que tocam a semana selecionada.",
+                f"O relatório inclui atribuições que tocam {'o' if period == 'mês' else 'a'} {period} selecionad{'o' if period == 'mês' else 'a'}.",
                 body,
             ),
         ]

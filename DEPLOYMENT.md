@@ -150,6 +150,8 @@ python -m flask --app app:create_app restore-postgres --source backups/snapshot.
 
 São utilizados `pg_dump` custom e `pg_restore --single-transaction --exit-on-error`, sem comandos de limpeza/drop. A senha é passada no ambiente do subprocesso e não na linha de comando; saídas privadas das ferramentas não são registradas. Restauração no mesmo banco ou em destino com tabelas é recusada. O ensaio automatizado cria e remove somente databases fictícios de testes.
 
+O cliente `pg_dump` não pode ter versão principal inferior à do servidor. Para PostgreSQL 18, use clientes 18 no PATH. O Dockerfile inclui as ferramentas 18; o workflow nativo também as instala e confere explicitamente, evitando depender do cliente padrão do runner. Essa correção do workflow ainda precisa de execução no GitHub Actions. Referências: [compatibilidade do pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html) e [pacotes oficiais para Ubuntu](https://www.postgresql.org/download/linux/ubuntu/).
+
 Arquivos locais não são backup externo. Ainda é necessário aprovar armazenamento externo protegido, retenção, agendamento, acesso restrito e ensaio regular de restauração. Ativar recuperação gerenciada do plano escolhido e monitorar falhas. RPO/RTO de produção não foram medidos. Não guardar dumps no GitHub nem dentro de uma imagem Docker. [Recuperação no Render](https://render.com/docs/postgresql-backups).
 
 ## Outbox e API de e-mail

@@ -4,7 +4,8 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:18.3
@@ -24,6 +25,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
+      # O cliente padrão do runner pode ser anterior ao servidor 18.
+      # A imagem Docker já inclui essas ferramentas; o job nativo também precisa.
+      - name: Instalar clientes PostgreSQL 18
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - name: Conferir versões das ferramentas de backup
+        run: |
+          pg_dump --version | grep -E '\(PostgreSQL\) 18\.'
+          pg_restore --version | grep -E '\(PostgreSQL\) 18\.'
       - run: python -m pip install -r requirements-dev.txt
       - run: python -m pip check
       - run: python -m pytest -v -W error --cov=app --cov-branch --cov-report=term-missing

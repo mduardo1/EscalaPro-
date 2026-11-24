@@ -215,6 +215,29 @@ def test_pg_password_not_in_subprocess_arguments(app, tmp_path, monkeypatch):
     )
 
 
+@pytest.mark.parametrize("userinfo", ["fake", "fake:old-password-sentinel"])
+def test_pg_query_password_not_in_subprocess_arguments(monkeypatch, userinfo):
+    from app.services.backup_service import run_postgres_tool
+
+    captured = {}
+    monkeypatch.setattr("app.services.backup_service.shutil.which", lambda _: "pg_dump")
+
+    def fake_run(args, **kwargs):
+        captured.update(args=args, **kwargs)
+        return MagicMock(returncode=0)
+
+    monkeypatch.setattr("app.services.backup_service.subprocess.run", fake_run)
+    run_postgres_tool(
+        "pg_dump",
+        [],
+        f"postgresql://{userinfo}@localhost/test?password=query-password-sentinel&sslmode=require",
+    )
+    assert "query-password-sentinel" not in " ".join(captured["args"])
+    assert "old-password-sentinel" not in " ".join(captured["args"])
+    assert captured["env"]["PGPASSWORD"] == "query-password-sentinel"
+    assert "sslmode=require" in captured["args"][-1]
+
+
 def test_migration_outbox_can_reverse_without_losing_business_data(app):
     with app.app_context():
         original = get_db().execute("SELECT password_hash FROM users").fetchone()[0]

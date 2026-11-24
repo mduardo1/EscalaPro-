@@ -36,6 +36,12 @@ def number_value(value, label, minimum, maximum, integer=False):
 
 def date_value(value, *, minimum=MIN_DATE, maximum=MAX_DATE):
     try:
+        # fromisoformat também aceita datas compactas e de semana ISO, mas as
+        # rotas e os campos HTML usam exclusivamente AAAA-MM-DD.
+        if not isinstance(value, str) or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value
+        ):
+            raise ValueError
         result = date.fromisoformat(value)
         if not minimum <= result <= maximum:
             raise ValueError

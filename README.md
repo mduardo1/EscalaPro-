@@ -6,6 +6,39 @@ Aplicação web para organizar pessoas, turnos e jornadas com clareza. Projeto d
 
 **Fase 2:** suporte a PostgreSQL, migrações Alembic, Gunicorn, health checks, proxy confiável e outbox criptografada com API HTTPS. SQLite e SMTP continuam disponíveis localmente. O banco principal e o `.env` foram preservados; não houve deploy. A homologação externa ainda está pendente. Consulte [DEPLOYMENT.md](DEPLOYMENT.md) para variáveis, testes Linux, transferência de dados, backup/restauração e custos, e [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) para o estado de cada achado.
 
+**Estado verificado em 24/11/2026 — B: pronto para demonstração local, com publicação e novo CI pendentes.** **278 testes aprovados no Linux/PostgreSQL 18**, sem falhas ou testes ignorados. Windows: 264 aprovados e 14 ignorados, todos executados no Linux. Chromium real: **21 verificações funcionais e 28 combinações de página/resolução**, incluindo desktop, tablet e celular. Foram corrigidos formulários comprimidos e foco do calendário. O [relatório atual](AUDIT_CURRENT.md) registra evidências e limites; produção ainda exige homologação própria.
+
+O [checklist final de portfólio](PORTFOLIO_READINESS_REPORT.md) registra os resultados e as pendências. As **dez capturas reais** estão no [guia de screenshots](docs/screenshots/README.md), com dimensões e instruções de reprodução. Origin foi corrigido com autorização. A publicação e a execução remota do workflow corrigido dependem de autorização separada; consulte o [plano de reconciliação](GIT_RECONCILIATION_PLAN.md).
+
+## Interface real com dados fictícios
+
+Dashboard em Chromium, com empresa e pessoas fictícias:
+
+![Dashboard do EscalaPro](docs/screenshots/02-dashboard.png)
+
+<details>
+<summary>Login, calendário, atribuição e PDF</summary>
+
+![Login vazio](docs/screenshots/01-login.png)
+
+![Calendário mensal preenchido](docs/screenshots/05-calendario-mensal.png)
+
+![Formulário de atribuição](docs/screenshots/06-atribuicao-escala.png)
+
+![PDF mensal no visualizador real](docs/screenshots/08-relatorio-pdf.png)
+
+</details>
+
+| Outras telas | Captura real |
+|---|---|
+| Funcionários | [Cadastro e equipe](docs/screenshots/03-funcionarios.png) |
+| Turnos | [Turnos diurnos e noturno](docs/screenshots/04-turnos.png) |
+| Semana | [Calendário semanal](docs/screenshots/07-calendario-semanal.png) |
+| Tablet | [768 × 1024](docs/screenshots/09-versao-tablet.png) |
+| Celular | [390 × 844](docs/screenshots/10-versao-mobile.png) |
+
+Foram verificadas as resoluções **1920 × 1080, 1366 × 768, 768 × 1024 e 390 × 844**. As imagens de página completa podem ser mais altas que o viewport. A validação usou Chromium desktop com emulação de viewport; outros navegadores e aparelhos físicos continuam pendentes.
+
 ## Experimentar com dados fictícios
 
 Recomendado para explorar o portfólio ou desenvolver sem acessar contas reais. Requisitos: Python 3.14 e Git. Na raiz do projeto, use o ambiente virtual existente ou crie um novo em uma instalação limpa:
@@ -37,11 +70,12 @@ Veja [GITHUB_READINESS.md](GITHUB_READINESS.md) para auditoria, preservação do
 - Dashboard com funcionários ativos, turnos, atribuições da semana, alertas, próximos turnos e gráfico de horas.
 - Funcionários: cadastro, pesquisa por nome/cargo/setor, edição, desativação e reativação com histórico preservado.
 - Turnos: cadastro e edição de nome, início, fim, intervalo e cor.
-- Calendário semanal com navegação por data, criação, edição e remoção de atribuições.
+- Calendário mensal completo como visualização principal, navegação entre meses, botão Hoje e seleção de mês/ano; visualização semanal preservada em **Ver semana**.
+- Atribuição diretamente pelo dia, até três resumos por célula e lista completa do dia para consultar, editar e remover turnos.
 - Bloqueio de sobreposições e indisponibilidades, inclusive em turnos noturnos.
 - Cadastro e remoção de indisponibilidades, como folgas e férias.
 - Alertas configuráveis de descanso mínimo e jornada semanal individual.
-- Exportação PDF semanal com empresa, período, profissionais, turnos, datas, horários e geração.
+- Exportação PDF mensal ou semanal com empresa, período, profissionais, turnos, datas, horários e geração.
 - Interface em português, com navegação por teclado, foco visível e respeito a movimento reduzido.
 
 ## Tecnologias
@@ -50,7 +84,7 @@ Python 3.14, Flask 3.1, SQLite (`sqlite3` da biblioteca padrão), Jinja2, Werkze
 
 Produção preparada com Python 3.14.8, PostgreSQL/psycopg, SQLAlchemy Core, Alembic, Gunicorn no Linux e Fernet para payloads da outbox. `pytest` e `pypdf` passaram para `requirements-dev.txt`; para executar testes, instale esse arquivo.
 
-Sem etapa de build de frontend. Chart.js 4.4.8 é carregado de um CDN com versão fixa; se estiver indisponível, um gráfico simples em HTML exibe os mesmos valores. As fontes gratuitas **Manrope** (títulos) e **Inter** (texto) vêm do Google Fonts, com fontes locais de fallback. As variáveis de tipografia e cores ficam em `app/static/css/variables.css`. Nenhuma fonte proprietária foi incorporada. O calendário semanal é renderizado com Jinja2 e CSS; FullCalendar não é necessário para as operações deste MVP.
+Sem etapa de build de frontend. Chart.js 4.4.8 é carregado de um CDN com versão fixa; se estiver indisponível, um gráfico simples em HTML exibe os mesmos valores. As fontes gratuitas **Manrope** (títulos) e **Inter** (texto) vêm do Google Fonts, com fontes locais de fallback. As variáveis de tipografia e cores ficam em `app/static/css/variables.css`. Nenhuma fonte proprietária foi incorporada. Os calendários mensal e semanal são renderizados com Jinja2 e CSS; FullCalendar não é necessário para as operações deste MVP.
 
 ## Instalação no Windows (PowerShell)
 
@@ -121,7 +155,10 @@ python -m flask --app run run --debug
 2. Em **Funcionários**, cadastre a equipe e sua jornada semanal de referência.
 3. Em **Turnos**, cadastre horários e intervalos.
 4. Em **Escalas**, registre indisponibilidades e atribua turnos aos funcionários ativos.
-5. Navegue entre semanas e use **Exportar PDF** para obter o relatório do período exibido.
+5. Navegue entre meses ou selecione mês e ano. Clique em um dia para abrir o formulário com a data preenchida. **Ver todos** mostra as atribuições dos dias com muitos turnos.
+6. Use **Exportar PDF mensal** para obter o mês exibido. Para o relatório semanal, abra **Ver semana** e use **Exportar PDF semanal**.
+
+O calendário mensal usa sete colunas, de segunda a domingo, e destaca o dia atual no fuso configurado. Turnos noturnos também aparecem como continuação no dia seguinte, inclusive na virada do mês. Os alertas de jornada permanecem semanais: as semanas que cruzam as bordas do mês são calculadas integralmente. O salvamento recarrega o calendário já atualizado e mantém o período da data salva. Links, formulários e consultas do dia funcionam sem JavaScript. Os limites existentes de janeiro de 2000 a dezembro de 2100 continuam válidos; a melhoria não exige migração.
 
 Uma instalação nova começa sem funcionários ou turnos. O gerador de demonstração e os testes criam dados fictícios apenas em suas bases separadas; nenhum registro do banco principal é reutilizado.
 
@@ -172,9 +209,14 @@ Rotas recebem os dados e apresentam respostas; serviços validam operações; mo
 
 ## Testes
 
-A suíte da Fase 2 inclui testes PostgreSQL reais quando `TEST_DATABASE_URL` aponta para um banco fictício local/CI terminado em `_test`. A reprodução Linux completa está em `docker compose -f compose.test.yml -p escalapro-tests up --build --abort-on-container-exit --exit-code-from tests`. Os relatórios atuais ficam em `tmp/phase2-*`; os resultados de 147 testes abaixo são da auditoria anterior, preservados como histórico. Veja [DEPLOYMENT.md](DEPLOYMENT.md).
+Revalidação final de **24/11/2026**, depois das correções de interface, sempre com `-W error`; cobertura de **app, migrations e scripts**:
 
-Referência da Fase 2: **208 testes aprovados no Linux**, sem avisos ou testes ignorados; Windows: **206 aprovados e 2 testes específicos ignorados**, ambos executados no Linux. Cobertura Linux incluindo aplicação e migrações: **93,81% das linhas**, **85,91% das ramificações**, **92,19% combinada**. Os resultados da preparação do portfólio, incluindo os novos testes da demo e da auditoria, estão em [GITHUB_READINESS.md](GITHUB_READINESS.md). Nenhum teste utiliza o banco principal ou envia e-mail real.
+| Ambiente | Aprovados | Ignorados | Falhas/erros | Linhas | Ramificações | Combinada |
+|---|---:|---:|---:|---:|---:|---:|
+| Linux/Python 3.14.8/PostgreSQL 18.3 | **278** | **0** | **0** | **92,33%** | **85,40%** | **90,86%** |
+| Windows/Python 3.14.3 | 264 | 14 | 0 | 86,28% | 77,19% | 84,35% |
+
+Os 14 ignorados no Windows passaram no Linux. Não somar execuções como testes distintos: a suíte possui 278 casos. A cobertura mede Python e não comprova JavaScript ou responsividade. Evidências e lacunas estão em [AUDIT_CURRENT.md](AUDIT_CURRENT.md); os documentos das etapas anteriores são históricos.
 
 ```powershell
 python -m pytest -q -W error -o cache_dir=tmp/pytest-cache
@@ -182,15 +224,23 @@ python -m pytest -q -W error -o cache_dir=tmp/pytest-cache
 
 Os testes cobrem inicialização, autorização, login/logout, hash, CSRF real nos formulários, limite de tentativas, comandos CLI, cadastro/edição/pesquisa/status de funcionários, validações, turnos, conflitos noturnos, indisponibilidades, edição/remoção de escalas, bordas semanais, alertas configuráveis, escape HTML, consultas de pesquisa e conteúdo do PDF. Cada teste utiliza um SQLite isolado em `tmp/pytest/`; o banco principal não é reutilizado. Essa pasta é descartável e recriada pelo Pytest. Não coloque arquivos pessoais nela.
 
-Validação em 17/10/2026, incluindo a correção do login e isolamento entre empresas: **147 testes aprovados**, sem avisos com `-W error`, e `pip check` sem incompatibilidades. Foram exercitados os fluxos de conta, links e formulários, e-mail HTML/texto com SMTP simulado, migração, integração HTTP em loopback e PDF. Cobertura do Python: **96,23% das linhas**, **90,23% das ramificações**, **95,11% combinada**. A revisão visual das telas em desktop/celular e a execução do JavaScript em navegador permanecem pendentes: não havia navegador conectado à ferramenta. Consulte [ACCOUNT_SETUP.md](ACCOUNT_SETUP.md) para configuração SMTP, diagnóstico de servidores antigos, migração, testes e limitações atuais; [AUDIT_REPORT.md](AUDIT_REPORT.md) registra a auditoria anterior.
+Há testes de contas com códigos e remetentes simulados, isolamento entre empresas, calendário mensal e semanal, anos bissextos, turnos noturnos, PDFs paginados e fluxos HTTP reais em loopback. A revisão adicional em Chromium executou 21 verificações funcionais, incluindo foco, cliques, formulários, confirmações, menu e downloads, além de 28 combinações de página/resolução. O [guia de capturas](docs/screenshots/README.md) explica como executar os testes opcionais Playwright; eles ficam separados da suíte pytest. Consulte [ACCOUNT_SETUP.md](ACCOUNT_SETUP.md) para a configuração das contas.
 
 Para reproduzir a medição, instale `requirements-dev.txt` e execute:
 
 ```powershell
-python -m pytest -v --cov=app --cov-branch --cov-report=term-missing
+python -m pytest -q -W error --cov=app --cov=migrations --cov=scripts --cov-branch --cov-report=term-missing
 ```
 
 Os testes desativam o carregamento do `.env`, usam credenciais fictícias e não consultam o banco principal. A cobertura mede somente Python, não HTML, CSS ou JavaScript.
+
+Para incluir os 14 casos atuais de integração PostgreSQL/Linux em ambiente descartável, com Docker ativo:
+
+```sh
+docker compose --env-file .env.example -f compose.test.yml -p escalapro-tests up --build --abort-on-container-exit --exit-code-from tests
+```
+
+Esse comando inicia somente a topologia fictícia de `compose.test.yml`; não aponte testes para a base real. Ao terminar, encerre seus recursos de teste com `docker compose --env-file .env.example -f compose.test.yml -p escalapro-tests down --volumes`. Servidor, `pg_dump` e `pg_restore` 18.3 foram conferidos no Docker. O workflow local instala e seleciona clientes 18; essa mudança ainda precisa ser publicada com autorização e executada no GitHub Actions.
 
 Para formatar o código durante o desenvolvimento, instale as ferramentas opcionais de `requirements-dev.txt` e use `python -m black app tests run.py` e `python -m djlint app/templates --reformat`. Elas não são necessárias para executar o sistema.
 

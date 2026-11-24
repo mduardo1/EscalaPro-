@@ -1,5 +1,7 @@
 # EscalaPro — auditoria de prontidão para produção
 
+> Histórico de implementação. Para o estado revalidado em 12/11/2026, consulte [AUDIT_CURRENT.md](AUDIT_CURRENT.md). As contagens e evidências abaixo pertencem às etapas anteriores.
+
 **Auditoria original:** 17/10/2026 · **Atualização:** Fase 2 implementada em ambiente isolado.
 
 ## Fase 2 — estado atual dos achados

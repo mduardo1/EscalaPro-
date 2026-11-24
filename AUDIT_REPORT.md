@@ -1,5 +1,7 @@
 # Auditoria técnica — EscalaPro
 
+> Histórico. A revalidação de 12/11/2026, com resultados atuais, correções e limitações, está em [AUDIT_CURRENT.md](AUDIT_CURRENT.md).
+
 > Relatório histórico da versão anterior ao cadastro público. A implementação posterior de cadastro, recuperação de senha, migrações e isolamento entre empresas está documentada em [ACCOUNT_SETUP.md](ACCOUNT_SETUP.md); consulte o README para os resultados atuais.
 
 **Período:** 16–17/10/2026, America/Sao_Paulo.  

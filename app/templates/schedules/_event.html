@@ -1,0 +1,20 @@
+{% from 'components/forms.html' import csrf %}
+{% macro event(row, day, period_args, compact=false) %}
+  <article class="schedule-event{{ ' compact-event' if compact else '' }}" style="--shift-color: {{ row.color }}">
+    <a class="event-edit" href="{{ url_for('schedules.index', schedule_id=row.id, **period_args) }}#assignment-form"
+       aria-label="Editar turno de {{ row.employee_name }}">
+      <span class="event-time">{% if row.start_at[:10] != day %}↳ Continuação{% else %}{{ row.start_at[11:16] }} — {{ row.end_at[11:16] }}{% if row.start_at[:10] != row.end_at[:10] %} (+1){% endif %}{% endif %}</span>
+      <strong>{{ row.employee_name }}</strong>
+      <span>{{ row.shift_name }}</span>
+    </a>
+    {% if not compact %}
+      <div class="event-actions">
+        <a href="{{ url_for('schedules.index', schedule_id=row.id, **period_args) }}#assignment-form">Editar</a>
+        <form method="post" action="{{ url_for('schedules.delete', schedule_id=row.id, **period_args) }}"
+              data-confirm="Remover esta atribuição da escala?">
+          {{ csrf() }}<button type="submit" aria-label="Remover turno de {{ row.employee_name }}">Remover</button>
+        </form>
+      </div>
+    {% endif %}
+  </article>
+{% endmacro %}

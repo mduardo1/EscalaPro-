@@ -1,6 +1,6 @@
 -r requirements.txt
 pytest==9.1.1
-pypdf==6.21.0
+pypdf==6.21.4
 # Ferramentas opcionais para manutenção; não são necessárias ao servidor.
 black==26.10.1
 djlint==1.46.6

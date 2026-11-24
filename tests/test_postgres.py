@@ -403,7 +403,10 @@ def test_pg_dump_restore_into_new_database(pg_app, tmp_path):
         admin.dispose()
 
 
-def test_linux_gunicorn_serves_database_readiness_without_logging_queries(pg_app):
+@pytest.mark.parametrize("first_probe_timeout", [False, True])
+def test_linux_gunicorn_serves_database_readiness_without_logging_queries(
+    pg_app, first_probe_timeout
+):
     import importlib.util
     import subprocess
     import sys
@@ -415,6 +418,18 @@ def test_linux_gunicorn_serves_database_readiness_without_logging_queries(pg_app
 
     if importlib.util.find_spec("gunicorn") is None or sys.platform == "win32":
         pytest.skip("Gunicorn é executado no teste Linux.")
+    if first_probe_timeout:
+        # Reproduz uma sondagem que vence enquanto o worker ainda inicializa.
+        # As sondagens seguintes e o login continuam usando HTTP real.
+        real_urlopen = urlopen
+        failures = iter([TimeoutError("Sondagem inicial simulada.")])
+
+        def urlopen(*args, **kwargs):
+            error = next(failures, None)
+            if error:
+                raise error
+            return real_urlopen(*args, **kwargs)
+
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
@@ -453,7 +468,7 @@ def test_linux_gunicorn_serves_database_readiness_without_logging_queries(pg_app
                 ) as response:
                     assert response.status == 200
                 break
-            except URLError:
+            except URLError, TimeoutError:
                 if time.monotonic() > deadline or process.poll() is not None:
                     pytest.fail("Gunicorn não ficou pronto no ambiente isolado.")
                 time.sleep(0.1)

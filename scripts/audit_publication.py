@@ -138,13 +138,16 @@ def private_values():
     return values
 
 
-def inspect_content(name, raw, private):
+def inspect_content(name, raw, private, *, source_path=None):
+    # O rótulo identifica a camada Git no relatório; regras por arquivo usam
+    # o caminho original, preservado inclusive para blobs históricos.
+    source_path = source_path if source_path is not None else name
     findings = []
     text = raw.decode("utf-8", errors="replace")
     for number, line in enumerate(text.splitlines(), 1):
         for category, pattern in PATTERNS.items():
             matches = list(pattern.finditer(line))
-            if category == "authenticated_database_url" and name.startswith(
+            if category == "authenticated_database_url" and source_path.startswith(
                 ("tests/", "compose.test.yml", ".github/workflows/")
             ):
                 matches = [
@@ -183,7 +186,7 @@ def inspect_content(name, raw, private):
                 or match.group(1).lower().endswith((".test", ".invalid"))
             )
         ]
-        if external and name not in {
+        if external and source_path not in {
             "app/assets/fonts/LICENSE.txt",
             "app/assets/fonts/DejaVuSans.ttf",
             "app/assets/fonts/DejaVuSans-Bold.ttf",
@@ -198,7 +201,7 @@ def inspect_content(name, raw, private):
         text,
     ):
         findings.append({"path": name, "category": "database_dump_content"})
-    if Path(name).name == ".env.example":
+    if Path(source_path).name == ".env.example":
         from dotenv import dotenv_values
         from io import StringIO
 
@@ -264,7 +267,10 @@ def audit(*, manifest=False):
             )
         findings.extend(
             inspect_content(
-                f"index:{name}", git("cat-file", "blob", oid).stdout, private
+                f"index:{name}",
+                git("cat-file", "blob", oid).stdout,
+                private,
+                source_path=name,
             )
         )
     commits = git("rev-list", "--all", check=False).stdout.splitlines()
@@ -284,6 +290,7 @@ def audit(*, manifest=False):
                         f"history-blob:{oid}",
                         git("cat-file", "blob", oid).stdout,
                         private,
+                        source_path=name,
                     )
                 )
     if manifest and not findings:

@@ -1,5 +1,7 @@
 # EscalaPro — preparação do portfólio e auditoria de publicação
 
+> Histórico de 18/10/2026. O projeto já possui Git e um commit local; a revalidação de 12/11/2026 está em [AUDIT_CURRENT.md](AUDIT_CURRENT.md). As contagens, a ausência de histórico e os resultados Linux abaixo descrevem aquela etapa, não uma nova execução.
+
 **Data:** 18/10/2026. **Estado:** preparação local; nenhum commit, remoto, push ou deploy autorizado/executado. Nenhuma licença do projeto foi escolhida.
 
 ## Escopo e resultado

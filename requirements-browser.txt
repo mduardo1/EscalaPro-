@@ -1,0 +1,3 @@
+# Ferramentas opcionais de validação visual; não integram o runtime do servidor.
+-r requirements-dev.txt
+playwright==1.65.2

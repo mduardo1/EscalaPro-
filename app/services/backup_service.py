@@ -50,7 +50,9 @@ def postgres_environment(value):
     if url.drivername not in {"postgresql", "postgres", "postgresql+psycopg"}:
         raise ValueError("A conexão deve ser PostgreSQL.")
     env = os.environ.copy()
-    env["PGPASSWORD"] = url.password or ""
+    # SQLAlchemy também aceita password na query e lhe dá precedência sobre
+    # userinfo. Nenhuma das duas formas deve aparecer nos argumentos do processo.
+    env["PGPASSWORD"] = url.query.get("password", url.password or "")
     env["PGCONNECT_TIMEOUT"] = "5"
     values = {
         "user": url.username,
@@ -59,6 +61,7 @@ def postgres_environment(value):
         "dbname": url.database,
         **url.query,
     }
+    values.pop("password", None)
     # libpq não interpreta '+' como espaço numa URI; conninfo preserva options/TLS.
     safe = make_conninfo(
         **{key: value for key, value in values.items() if value is not None}

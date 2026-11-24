@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from scripts import audit_publication as audit
 
 
@@ -106,3 +108,96 @@ def test_publication_recognizes_plain_database_dump_disguised_as_text():
         "notes.txt", b"-- PostgreSQL database dump\n", set()
     )
     assert any(row["category"] == "database_dump_content" for row in findings)
+
+
+def commit_fixture(root):
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(root),
+            "-c",
+            "user.name=Audit Test",
+            "-c",
+            "user.email=audit@example.test",
+            "commit",
+            "-qm",
+            "test fixture",
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_approved_test_urls_and_vendor_attribution_in_index_and_history(
+    tmp_path, monkeypatch
+):
+    root = temporary_repository(tmp_path, monkeypatch)
+    (root / "tests").mkdir()
+    (root / "tests/test_fake.py").write_text(
+        "postgresql://fake:isolated-test-only@localhost/escalapro_test",
+        encoding="utf-8",
+    )
+    fonts = root / "app/assets/fonts"
+    fonts.mkdir(parents=True)
+    (fonts / "LICENSE.txt").write_bytes(b"Font author <author@" + b"vendor.example>")
+    subprocess.run(
+        ["git", "-C", str(root), "add", "."], check=True, capture_output=True
+    )
+    commit_fixture(root)
+    report = audit.audit()
+    assert report["history_commits"] == 1
+    assert report["index_blobs_scanned"] == 3
+    assert not report["findings"]
+
+
+@pytest.mark.parametrize("history", [False, True])
+def test_environment_template_secret_is_checked_in_every_git_layer(
+    tmp_path, monkeypatch, history
+):
+    root = temporary_repository(tmp_path, monkeypatch)
+    target = root / ".env.example"
+    target.write_text(
+        "SECRET_KEY=fictitious-template-value-for-regression", encoding="utf-8"
+    )
+    subprocess.run(
+        ["git", "-C", str(root), "add", ".env.example"], check=True, capture_output=True
+    )
+    if history:
+        commit_fixture(root)
+    target.write_text("SECRET_KEY=", encoding="utf-8")
+    report = audit.audit()
+    origin = "history-blob:" if history else "index:"
+    assert any(
+        row["path"].startswith(origin)
+        and row["category"] == "nonempty_private_environment_example"
+        for row in report["findings"]
+    )
+
+
+def test_git_test_url_exception_does_not_allow_unapproved_password(
+    tmp_path, monkeypatch
+):
+    root = temporary_repository(tmp_path, monkeypatch)
+    (root / "tests").mkdir()
+    target = root / "tests/test_fake.py"
+    target.write_text(
+        "postgresql://fake:" + "unapproved-sentinel@localhost/escalapro_test",
+        encoding="utf-8",
+    )
+    subprocess.run(
+        ["git", "-C", str(root), "add", "."], check=True, capture_output=True
+    )
+    commit_fixture(root)
+    target.write_text("clean working tree", encoding="utf-8")
+    report = audit.audit()
+    assert any(
+        row["path"].startswith("index:")
+        and row["category"] == "authenticated_database_url"
+        for row in report["findings"]
+    )
+    assert any(
+        row["path"].startswith("history-blob:")
+        and row["category"] == "authenticated_database_url"
+        for row in report["findings"]
+    )

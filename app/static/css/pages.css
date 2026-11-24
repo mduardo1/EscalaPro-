@@ -209,13 +209,93 @@
 }
 
 .calendar-toolbar {
-  border-bottom: 1px solid var(--border)
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 16px
 }
 
 .week-navigation {
   display: flex;
   align-items: center;
-  gap: 8px
+  gap: 8px;
+  flex-wrap: wrap
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: var(--border);
+  gap: 1px
+}
+
+.month-weekday {
+  text-align: center;
+  padding: 12px 2px;
+  font-size: 11px;
+  color: #526078;
+  background: #F5F8FF;
+  font-weight: 650
+}
+
+.month-day, .month-blank {
+  min-width: 0;
+  min-height: 165px;
+  background: white
+}
+
+.month-blank { background: #F8FAFC }
+
+.month-day {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 7px;
+  cursor: pointer
+}
+
+.month-day:hover { background: #FAFBFF }
+.month-day.is-selected { box-shadow: inset 0 0 0 2px #B9CCF5 }
+.is-today { background: #EFF6FF }
+.month-day.is-today { box-shadow: inset 0 0 0 2px var(--blue) }
+
+.month-day-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px;
+  color: #344054
+}
+
+.month-day-heading strong { font-size: 15px }
+.month-day-heading>span { font-size: 9px; color: #61718B }
+.is-today .month-day-heading strong { color: var(--blue) }
+.month-events { display: grid; gap: 5px }
+.month-day .add-day { display: flex; align-items: center; justify-content: center; gap: 3px }
+.month-day .schedule-event { padding: 6px; gap: 3px }
+.event-edit { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: #344054 }
+.event-edit strong { font-size: 11px; line-height: 1.4 }
+.event-edit>span:last-child { font-size: 10px; color: #526078 }
+.compact-event .event-edit>* { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.more-events { font-size: 11px; color: var(--blue); padding: 4px 0 }
+#day-detail { scroll-margin-top: 20px }
+.selected-day-events { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px }
+.selected-day-events .event-actions a,
+.selected-day-events .event-actions button { font-size: 12px; padding: 6px 0 }
+
+@media (max-width: 700px) {
+  .month-day { padding: 4px; min-height: 135px; gap: 5px }
+  .month-day-heading { justify-content: center }
+  .month-day-heading>span { display: none }
+  .month-day .schedule-event { padding: 4px 2px; border-left-width: 2px }
+  .compact-event .event-edit { gap: 2px }
+  .compact-event .event-edit strong, .compact-event .event-edit>span:last-child { font-size: 9px }
+  .compact-event .event-time { display: none }
+  .day-count-label { display: none }
+  .month-day .add-day { min-height: 30px }
+  .month-weekday { font-size: 9px }
+  .more-events { text-align: center; min-height: 28px }
 }
 
 .inline-form {
@@ -384,6 +464,16 @@
 
 .schedule-forms {
   grid-template-columns: 1fr 1fr
+}
+
+@media (max-width: 980px) {
+  .schedule-forms {
+    grid-template-columns: minmax(0, 1fr)
+  }
+
+  .month-day-heading>span {
+    display: none
+  }
 }
 
 .schedule-forms .section-heading p {
