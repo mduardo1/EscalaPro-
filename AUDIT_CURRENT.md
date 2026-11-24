@@ -1,10 +1,10 @@
 # EscalaPro — auditoria técnica atual
 
-**Atualizado em 24/11/2026, America/Sao_Paulo. Base local: 53af6e7 e alterações recebidas. Classificação B — pronto para demonstração local; publicação e novo CI pendentes.**
+**Atualizado em 24/11/2026, America/Sao_Paulo. Base local: 53af6e7 e alterações recebidas. Classificação A — versão da branch validada para portfólio público; integração em main pendente.**
 
 ## A. Diagnóstico atual
 
-**CORRIGIDO:** acesso alternativo ao navegador, formulários responsivos, foco do calendário e origin Git. **CONCLUÍDO:** dez capturas reais, 21 verificações de interface, 28 combinações de página/resolução, regressões completas e documentação. **BLOQUEADO:** novo CI até publicação autorizada. A autorização de alteração da configuração principal abrangeu origin; não houve commit, push ou deploy.
+**CORRIGIDO:** acesso alternativo ao navegador, formulários responsivos, foco do calendário e origin Git. **CONCLUÍDO:** dez capturas reais, 21 verificações de interface, 28 combinações de página/resolução, regressões completas e documentação. **CONCLUÍDO:** publicação autorizada da branch e [CI remoto](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) com 278 testes aprovados. **PENDENTE:** PR/integração em main, exigindo autorização separada. Não houve merge ou deploy.
 
 Linux/PostgreSQL 18.3: **278 aprovados, zero ignorados**. Windows: **264 aprovados, 14 ignorados**, todos exercitados no Linux. Cobertura Linux: **92,33% de linhas, 85,40% de ramificações, 90,86% combinada**. As 21 verificações Playwright não são somadas aos 278 casos pytest. Nenhuma falha foi ignorada para obter aprovação.
 
@@ -30,7 +30,7 @@ Não foi constatado defeito que justificasse trocar o framework, adotar ORM comp
 
 ## B. Achados e correções
 
-AT-01 a AT-09 foram reproduzidos/corrigidos em **12/11/2026**, preservados abaixo. A suíte atual revalidou suas regressões. Consultas de vulnerabilidades citadas nesses achados são históricas, não consultas novas em 24/11. AT-03 permanece pendente de CI remoto.
+AT-01 a AT-09 foram reproduzidos/corrigidos em **12/11/2026**, preservados abaixo. A suíte atual revalidou suas regressões. Consultas de vulnerabilidades citadas nesses achados são históricas, não consultas novas em 24/11. AT-03 foi encerrado pela execução remota real em 24/11, indicada abaixo.
 
 ### AT-01 — Datas alternativas aceitas, com navegação inválida após gravar
 
@@ -54,7 +54,7 @@ AT-01 a AT-09 foram reproduzidos/corrigidos em **12/11/2026**, preservados abaix
 - **Reprodução/verificação:** o YAML original usa serviço PostgreSQL 18.3 e executa pytest diretamente no runner; não instala nem seleciona `pg_dump`/`pg_restore` 18. O Dockerfile já copia ferramentas 18, mas não é usado por esse job. Não foi reproduzida uma execução remota com cliente 16 nesta auditoria.
 - **Causa:** correção aplicada à imagem Docker sem equivalente no workflow nativo. O cliente padrão do runner fica implícito.
 - **Arquivo/correção:** `.github/workflows/tests.yml`: runner `ubuntu-24.04`, timeout de 20 minutos, repositório oficial PGDG, instalação de `postgresql-client-18`, precedência de `/usr/lib/postgresql/18/bin` no PATH e conferência das duas versões antes dos testes.
-- **Evidência atual:** YAML analisado, oito etapas, permissões mínimas e ausência de `continue-on-error`; backup/restauração aprovado no Docker com clientes/servidor 18.3. **Pendente:** executar o workflow corrigido no GitHub. O job nativo Ubuntu/PGDG não foi executado só porque a imagem Debian passou; não foi declarado CI verde.
+- **Evidência atual — CONCLUÍDO:** YAML analisado e backup/restauração aprovado no Docker; o [run GitHub 45399188201](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) também passou no commit bfde09c, com clientes 18.7 instalados/selecionados no Ubuntu 24.04, servidor 18.3 e 278 testes aprovados. Nenhum erro foi suprimido para aprovar.
 - **Fundamento:** [compatibilidade documentada do pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html) e [instalação oficial no Ubuntu](https://www.postgresql.org/download/linux/ubuntu/). Um cliente de versão principal inferior não pode exportar o servidor mais novo.
 
 ### AT-04 — Dependência de testes pypdf com avisos conhecidos
@@ -106,9 +106,9 @@ AT-01 a AT-09 foram reproduzidos/corrigidos em **12/11/2026**, preservados abaix
 - **Arquivo/correção:** `tests/test_postgres.py` trata ambos durante a inicialização. **Mantidos** prazo total de 20 segundos, falha se o processo encerrar, exigência de HTTP 200 real e verificação de que parâmetros privados da URL não entram nos logs. Nenhum timeout de produção foi ampliado.
 - **Evidência:** as duas variantes Gunicorn, normal e com timeout inicial, passaram na suíte Linux final. Foi corrigido o teste, com justificativa técnica; não foi mascarado um erro persistente da aplicação.
 
-### AT-10 — Origin: CORRIGIDO; publicação: PENDENTE
+### AT-10 — Origin: CORRIGIDO; publicação da branch: CONCLUÍDA
 
-Com autorização explícita, origin foi corrigido para https://github.com/mduardo1/EscalaPro-.git e conferido para fetch/push. As bases têm commits iniciais distintos, mas 119 arquivos de blobs idênticos. O [plano de reconciliação](GIT_RECONCILIATION_PLAN.md) propõe nova cópia do remoto, preservando esta pasta. Nenhum commit/push/merge/rebase foi executado.
+Com autorização explícita, origin foi corrigido para https://github.com/mduardo1/EscalaPro-.git e conferido para fetch/push. As bases têm commits iniciais distintos, mas 119 arquivos de blobs idênticos. O [plano de reconciliação](GIT_RECONCILIATION_PLAN.md) foi executado em nova cópia do remoto. Commit bfde09c e push foram autorizados e realizados nessa cópia. A pasta principal preservou seu HEAD e índice; não houve merge ou rebase.
 
 ### AT-11 e AT-12 — Interface: CORRIGIDOS
 
@@ -198,13 +198,13 @@ git remote -v
 
 Branch local main, HEAD `53af6e7`; main público consultado: `74e787e62646fe6219b00a508c2e80f0b53c63c1`. Ambos têm a árvore `9c73b9127829246aab2073d84fe9f3b08b908c91`: **119 arquivos com blobs idênticos**. Os commits iniciais são distintos. Foi preparada uma cópia em tmp/publication-review, branch portfolio-validation, a partir desse main remoto; nela foram aplicados somente os 138 candidatos do manifesto, preservando esta pasta. Os arquivos são comparados por SHA-256 com a origem já testada antes de aprovar a publicação. Comandos, efeitos e aprovações: [plano de reconciliação](GIT_RECONCILIATION_PLAN.md).
 
-O YAML local usa Ubuntu 24.04, PostgreSQL 18.3, instalação PGDG de clientes 18, precedência no PATH e conferência de pg_dump/pg_restore. Oito etapas, permissões mínimas e falhas obrigatórias, sem continue-on-error. Docker/Linux passou; isso não valida a instalação PGDG no runner Ubuntu.
+O YAML local usa Ubuntu 24.04, PostgreSQL 18.3, instalação PGDG de clientes 18, precedência no PATH e conferência de pg_dump/pg_restore. Oito etapas, permissões mínimas e falhas obrigatórias, sem continue-on-error. Docker/Linux passou; a instalação PGDG no runner Ubuntu também foi validada pelo run remoto abaixo.
 
-A consulta atual ao GitHub encontrou apenas o [run antigo 40416904360](https://github.com/mduardo1/EscalaPro-/actions/runs/40416904360), de 26/10, com falha. A correção ainda é local. **Publicação PENDENTE e CI BLOQUEADO** até autorização para commit/push da cópia revisada e novo run bem-sucedido. Não houve commit, push, merge, rebase, force push, PR ou deploy.
+**Publicação e CI CONCLUÍDOS para a branch [portfolio-validation](https://github.com/mduardo1/EscalaPro-/tree/portfolio-validation)**, com autorização explícita. Commit de implementação `bfde09cac0257ca0037f72539c6fe379ece1f0ee`: 39 arquivos alterados/adicionados. O [run 45399188201](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) passou em 24/11/2026: **278 testes aprovados, zero ignorados, zero falhas**, em 50,70 s de pytest. Instalação PGDG e conferência de pg_dump/pg_restore **18.7**, servidor PostgreSQL **18.3**, pip check e Gunicorn passaram no runner Ubuntu 24.04. A cobertura remota, apenas de app, foi reportada como **93% combinada arredondada**; seu escopo é menor que app+migrations+scripts da tabela local, portanto não substituir os percentuais locais por esse valor. O run antigo com falha permanece histórico. **Integração em main PENDENTE**, sem merge, rebase, force push, PR ou deploy.
 
 ### Arquivos, capturas e preservação
 
-Alterações desta continuação: `app/static/css/pages.css`, `app/static/js/schedules.js`, `README.md`, `AUDIT_CURRENT.md`, este relatório, `docs/screenshots/README.md` e `PUBLICATION_MANIFEST.txt`. Adicionados `requirements-browser.txt`, `tests/browser/run_browser_checks.py`, `GIT_RECONCILIATION_PLAN.md` e os dez PNGs listados no [guia de capturas](docs/screenshots/README.md). Origin foi a única escrita autorizada na configuração Git. Os demais diffs recebidos foram preservados; a lista exata dos candidatos está em PUBLICATION_MANIFEST.txt.
+Alterações desta continuação: `app/static/css/pages.css`, `app/static/js/schedules.js`, `README.md`, `AUDIT_CURRENT.md`, este relatório, `docs/screenshots/README.md` e `PUBLICATION_MANIFEST.txt`. Adicionados `requirements-browser.txt`, `tests/browser/run_browser_checks.py`, `GIT_RECONCILIATION_PLAN.md` e os dez PNGs listados no [guia de capturas](docs/screenshots/README.md). Origin foi corrigido na pasta principal; commit e push foram autorizados e executados somente na cópia de revisão. Os demais diffs recebidos foram preservados; a lista exata dos candidatos está em PUBLICATION_MANIFEST.txt.
 
 **.env e banco principal preservados:** SHA-256 antes/depois sem alteração. A demo fonte não foi modificada pelo executor; alterações ocorreram na cópia browser-run-*.demo.sqlite3. Credenciais e códigos permaneceram privados. O projeto Compose escalapro-browser-regression foi encerrado; consulta final por rótulo não encontrou seus contêineres, redes ou volumes. Outros projetos Docker foram preservados.
 
@@ -212,6 +212,6 @@ Evidências privadas: `tmp/browser-validation-20261123/full-run/browser-results.
 
 ## G. Próxima ação
 
-Revisar [README e capturas](README.md), [manifesto](PUBLICATION_MANIFEST.txt) e [plano de reconciliação](GIT_RECONCILIATION_PLAN.md). A cópia de revisão e sua branch foram preparadas localmente; autorizar commit/push somente após revisar seu diff final. Exigir CI remoto verde do código publicado. Licença depende do proprietário; exclusão física de funcionários/turnos e outros navegadores são evoluções pendentes.
+Revisar [README e capturas](README.md), [manifesto](PUBLICATION_MANIFEST.txt) e [plano de reconciliação](GIT_RECONCILIATION_PLAN.md). A branch foi publicada e o CI remoto passou. A próxima autorização é para PR/integração em main; até lá, apresentar pelo link direto da branch validada. Licença depende do proprietário; exclusão física de funcionários/turnos e outros navegadores são evoluções pendentes.
 
-Classificação **B** até fechar publicação e CI. Produção exige homologação de HTTPS, infraestrutura, e-mail, operação, restauração externa e carga. Não há evidência de clientes reais, SLA ou resultados comerciais para divulgar.
+Classificação **A — versão da branch pronta para portfólio público**, com integração em main pendente. Produção exige homologação de HTTPS, infraestrutura, e-mail, operação, restauração externa e carga. Não há evidência de clientes reais, SLA ou resultados comerciais para divulgar.

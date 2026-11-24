@@ -1,6 +1,6 @@
 # EscalaPro — reconciliação segura para publicação
 
-**Atualizado em 24/11/2026. Origin corrigido com autorização explícita. Cópia local de revisão preparada; commit e push ainda não executados.**
+**Atualizado em 24/11/2026. Reconciliação e publicação da branch concluídas com autorização. CI remoto aprovado; PR/integração em main e deploy não realizados.**
 
 ## Evidência atual
 
@@ -41,14 +41,14 @@ git -C tmp/publication-review diff --cached --check
 git -C tmp/publication-review diff --cached --stat
 ```
 
-O índice principal continua vazio e seu HEAD continua `53af6e7`. Os testes aprovados pertencem exatamente aos mesmos bytes de código, não a um commit novo que ainda não existe.
+O índice principal continua vazio e seu HEAD continua `53af6e7`. Os bytes de código comparados e testados foram registrados no commit `bfde09cac0257ca0037f72539c6fe379ece1f0ee` da cópia.
 
 ## Etapa 3 — commit e publicação de uma branch
 
-**Exigem outra autorização explícita sobre o conteúdo final.** Primeiro revisar a lista exata e a auditoria de segredos, inclusive o índice da cópia. Não executar os comandos a seguir apenas por constarem neste plano.
+**CONCLUÍDO com autorização explícita do proprietário nesta sessão.** A auditoria da cópia conferiu 138 candidatos, 39 caminhos preparados no índice e zero apontamentos. O commit e o push abaixo foram executados após a aprovação do conteúdo final. Os comandos são registro do procedimento, não instrução para repeti-los.
 
 ```powershell
-# Executar dentro da cópia revisada, somente após autorização.
+# Executados dentro da cópia, após autorização.
 python scripts/audit_publication.py
 git diff --cached --check
 git diff --cached --stat
@@ -57,8 +57,8 @@ git commit -m "Valida interface e prepara capturas do EscalaPro"
 git push -u origin portfolio-validation
 ```
 
-O push publica o código e as capturas dessa branch no repositório público e dispara o workflow de testes. Não envia mudanças diretamente para `main`. Uma falha no CI precisa ser investigada e corrigida antes de solicitar integração. Criar PR, integrar em `main` e fazer deploy são ações separadas, também dependentes de autorização. Não haverá force push.
+O push publicou 39 arquivos alterados/adicionados e disparou o workflow, sem mudar `main`. A [branch pública](https://github.com/mduardo1/EscalaPro-/tree/portfolio-validation) contém código, documentação e dez capturas reais. Uma atualização documental na mesma branch registra a evidência remota. Criar PR, integrar em `main` e fazer deploy são ações separadas, dependentes de autorização. Não houve force push.
 
 ## Critério de aprovação
 
-O YAML local seleciona clientes PostgreSQL 18 e a suíte é exercitada em Linux/PostgreSQL. A execução GitHub do workflow corrigido só poderá ser marcada como concluída quando houver um run real bem-sucedido no commit publicado. A execução antiga não comprova a correção nova. Esta preparação de portfólio também não aprova uma operação pública em produção.
+O [run 45399188201](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) passou no commit `bfde09c`: **278 testes aprovados, zero ignorados**, em 50,70 s de pytest, clientes PostgreSQL **18.7** selecionados, servidor **18.3**, pip check e Gunicorn aprovados no Ubuntu 24.04. A cobertura remota se restringe a `app` (93% combinada arredondada); não substitui a cobertura local de escopo mais amplo. A execução antiga com falha permanece histórica. Esta preparação de portfólio não aprova uma operação pública em produção.

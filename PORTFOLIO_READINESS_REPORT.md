@@ -1,8 +1,8 @@
 # EscalaPro — validação final para portfólio
 
-**Execução: 23–24/11/2026, America/Sao_Paulo. Classificação B — pronto para demonstração local, com publicação e novo CI pendentes.**
+**Execução: 23–24/11/2026, America/Sao_Paulo. Classificação A — versão da branch validada para portfólio público; integração em main pendente.**
 
-O bloqueio de navegador foi contornado com Playwright autorizado. A interface real passou por 21 verificações funcionais e 28 combinações de página/resolução. Dez capturas reais foram geradas e revisadas. Duas falhas de interface foram reproduzidas e corrigidas. As regressões completas Windows/Linux passaram depois das correções.
+O bloqueio de navegador foi contornado com Playwright autorizado. A interface real passou por 21 verificações funcionais e 28 combinações de página/resolução. Dez capturas reais foram geradas e revisadas. Duas falhas de interface foram reproduzidas e corrigidas. As regressões completas Windows/Linux passaram depois das correções. A branch foi publicada com autorização e os 278 testes passaram também no GitHub Actions.
 
 ## 1. Checklist principal
 
@@ -11,13 +11,13 @@ O bloqueio de navegador foi contornado com Playwright autorizado. A interface re
 | Navegador | **CORRIGIDO** | Chromium real, sandbox habilitada, perfil temporário e TLS padrão. Cliques, formulários, diálogos, foco, console e rede executados. A ponte original do host continua indisponível. |
 | Responsividade | **CORRIGIDO** | Quatro viewports e sete páginas por viewport; corrigida a cascata CSS que comprimia formulários em até 980 px. |
 | Capturas | **CONCLUÍDO** | Dez PNGs reais revisados em `docs/screenshots/`; PDF fotografado no visualizador do Chromium. |
-| Preparação GitHub | **CORRIGIDO** | Origin corrigido com autorização; bases comparadas e plano seguro documentado. Publicação **PENDENTE**, com autorização separada. |
-| GitHub Actions | **BLOQUEADO** | Workflow local revisado e backend Linux aprovado; novo run remoto depende de publicação autorizada. |
+| Preparação GitHub | **CORRIGIDO** | Origin corrigido com autorização; bases comparadas, cópia revisada e branch publicada. Integração em main **PENDENTE**, com autorização separada. |
+| GitHub Actions | **CONCLUÍDO** | [Run remoto 45399188201](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) aprovado no commit bfde09c: 278 testes, clientes 18, pip check e Gunicorn. |
 | Testes | **CONCLUÍDO** | Linux: 278 aprovados/0 ignorados. Windows: 264 aprovados/14 ignorados. Mais 21 verificações de navegador, separadas da suíte pytest. |
 | Segurança e preservação | **CONCLUÍDO** | Regressões defensivas, isolamento, CSRF, sessão, auditor de publicação e comparação dos arquivos privados; conclusão restrita aos cenários executados. |
 | Documentação | **CONCLUÍDO** | Este relatório, auditoria atual, README com imagens reais, guia reproduzível, manifesto e plano de reconciliação. |
 
-São **quatro CONCLUÍDOS, três CORRIGIDOS e um BLOQUEADO**, sem somar as subtarefas abaixo.
+São **cinco CONCLUÍDOS, três CORRIGIDOS e zero BLOQUEADOS**, sem somar as subtarefas abaixo.
 
 ## 2. Navegador e ambiente isolado
 
@@ -84,13 +84,13 @@ git remote -v
 
 Branch local main, HEAD `53af6e7`; main público consultado: `74e787e62646fe6219b00a508c2e80f0b53c63c1`. Ambos têm a árvore `9c73b9127829246aab2073d84fe9f3b08b908c91`: **119 arquivos com blobs idênticos**. Os commits iniciais são distintos. Foi preparada uma cópia em tmp/publication-review, branch portfolio-validation, a partir desse main remoto; nela foram aplicados somente os 138 candidatos do manifesto, preservando esta pasta. Os arquivos são comparados por SHA-256 com a origem já testada antes de aprovar a publicação. Comandos, efeitos e aprovações: [plano de reconciliação](GIT_RECONCILIATION_PLAN.md).
 
-O YAML local usa Ubuntu 24.04, PostgreSQL 18.3, instalação PGDG de clientes 18, precedência no PATH e conferência de pg_dump/pg_restore. Oito etapas, permissões mínimas e falhas obrigatórias, sem continue-on-error. Docker/Linux passou; isso não valida a instalação PGDG no runner Ubuntu.
+O YAML local usa Ubuntu 24.04, PostgreSQL 18.3, instalação PGDG de clientes 18, precedência no PATH e conferência de pg_dump/pg_restore. Oito etapas, permissões mínimas e falhas obrigatórias, sem continue-on-error. Docker/Linux passou; a instalação PGDG no runner Ubuntu também foi validada pelo run remoto abaixo.
 
-A consulta atual ao GitHub encontrou apenas o [run antigo 40416904360](https://github.com/mduardo1/EscalaPro-/actions/runs/40416904360), de 26/10, com falha. A correção ainda é local. **Publicação PENDENTE e CI BLOQUEADO** até autorização para commit/push da cópia revisada e novo run bem-sucedido. Não houve commit, push, merge, rebase, force push, PR ou deploy.
+**Publicação e CI CONCLUÍDOS para a branch [portfolio-validation](https://github.com/mduardo1/EscalaPro-/tree/portfolio-validation)**, com autorização explícita. Commit de implementação `bfde09cac0257ca0037f72539c6fe379ece1f0ee`: 39 arquivos alterados/adicionados. O [run 45399188201](https://github.com/mduardo1/EscalaPro-/actions/runs/45399188201) passou em 24/11/2026: **278 testes aprovados, zero ignorados, zero falhas**, em 50,70 s de pytest. Instalação PGDG e conferência de pg_dump/pg_restore **18.7**, servidor PostgreSQL **18.3**, pip check e Gunicorn passaram no runner Ubuntu 24.04. A cobertura remota, apenas de app, foi reportada como **93% combinada arredondada**; seu escopo é menor que app+migrations+scripts da tabela local, portanto não substituir os percentuais locais por esse valor. O run antigo com falha permanece histórico. **Integração em main PENDENTE**, sem merge, rebase, force push, PR ou deploy.
 
 ## 7. Arquivos, capturas e preservação
 
-Alterações desta continuação: `app/static/css/pages.css`, `app/static/js/schedules.js`, `README.md`, `AUDIT_CURRENT.md`, este relatório, `docs/screenshots/README.md` e `PUBLICATION_MANIFEST.txt`. Adicionados `requirements-browser.txt`, `tests/browser/run_browser_checks.py`, `GIT_RECONCILIATION_PLAN.md` e os dez PNGs listados no [guia de capturas](docs/screenshots/README.md). Origin foi a única escrita autorizada na configuração Git. Os demais diffs recebidos foram preservados; a lista exata dos candidatos está em PUBLICATION_MANIFEST.txt.
+Alterações desta continuação: `app/static/css/pages.css`, `app/static/js/schedules.js`, `README.md`, `AUDIT_CURRENT.md`, este relatório, `docs/screenshots/README.md` e `PUBLICATION_MANIFEST.txt`. Adicionados `requirements-browser.txt`, `tests/browser/run_browser_checks.py`, `GIT_RECONCILIATION_PLAN.md` e os dez PNGs listados no [guia de capturas](docs/screenshots/README.md). Origin foi corrigido na pasta principal; commit e push foram autorizados e executados somente na cópia de revisão. Os demais diffs recebidos foram preservados; a lista exata dos candidatos está em PUBLICATION_MANIFEST.txt.
 
 **.env e banco principal preservados:** SHA-256 antes/depois sem alteração. A demo fonte não foi modificada pelo executor; alterações ocorreram na cópia browser-run-*.demo.sqlite3. Credenciais e códigos permaneceram privados. O projeto Compose escalapro-browser-regression foi encerrado; consulta final por rótulo não encontrou seus contêineres, redes ou volumes. Outros projetos Docker foram preservados.
 
@@ -106,6 +106,6 @@ Instruções opcionais completas: [guia do navegador](docs/screenshots/README.md
 docker compose --env-file .env.example -f compose.test.yml -p escalapro-browser-regression run --build --name escalapro-browser-regression-tests tests python -m pytest -q -W error --cov=app --cov=migrations --cov=scripts --cov-branch --cov-report=json:tmp/browser-regression-coverage.json --junitxml=tmp/browser-regression.xml
 ```
 
-**Próxima ação:** revisar o conjunto e autorizar commit e push da branch portfolio-validation já preparada na cópia, conforme o plano. O índice e o diff da cópia são locais; nenhum arquivo foi publicado. Exigir novo CI verde antes de anunciar validação remota no GitHub/LinkedIn. A licença depende de decisão do proprietário. Exclusão física de funcionários/turnos e outros navegadores são evoluções pendentes.
+**Próxima ação:** revisar a branch pública validada e autorizar separadamente PR/integração em main. A página padrão do repositório continua mostrando a versão antiga até essa integração; para apresentar agora, usar o link direto da branch acima. A evidência de CI pode ser citada com o link do run e seu commit. A licença depende de decisão do proprietário. Exclusão física de funcionários/turnos e outros navegadores são evoluções pendentes.
 
-Mantida a **classificação B** até fechar publicação e CI. Produção continua sem aprovação: faltam homologação de infraestrutura, HTTPS, e-mail real, operação, restauração externa e capacidade de carga. Não há evidência de SLA, clientes reais ou certificação de segurança.
+**Classificação A — pronto para portfólio público na branch validada.** A integração em main depende de autorização separada. Produção continua sem aprovação: faltam homologação de infraestrutura, HTTPS, e-mail real, operação, restauração externa e capacidade de carga. Não há evidência de SLA, clientes reais ou certificação de segurança.
